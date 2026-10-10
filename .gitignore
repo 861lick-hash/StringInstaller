@@ -1,0 +1,10 @@
+# Global gitignore
+bin/
+obj/
+**/bin/
+**/obj/
+[Bb]in/
+[Oo]bj/
+*.user
+.vs/
+publish_out/

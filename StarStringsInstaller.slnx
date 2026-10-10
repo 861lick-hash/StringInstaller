@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="StarStringsInstaller.Core/StarStringsInstaller.Core.csproj" />
+  <Project Path="StarStringsInstaller.Tests/StarStringsInstaller.Tests.csproj" />
+  <Project Path="StarStringsInstaller/StarStringsInstaller.csproj" />
+</Solution>
