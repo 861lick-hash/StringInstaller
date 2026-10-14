@@ -30,17 +30,25 @@ namespace StarStringsInstaller.Services
             }
         }
 
-        public async Task<ReleaseInfo?> GetLatestReleaseAsync()
+        public async Task<ReleaseInfo?> GetLatestReleaseAsync(string? environmentName = null)
         {
+            bool isPtu = !string.IsNullOrEmpty(environmentName) && environmentName.Equals("PTU", StringComparison.OrdinalIgnoreCase);
+            string targetTag = isPtu ? "latest-ptu" : "latest";
+
             try
             {
-                string apiUrl = $"https://api.github.com/repos/{RepositoryOwner}/{RepositoryName}/releases/latest";
+                string apiUrl = $"https://api.github.com/repos/{RepositoryOwner}/{RepositoryName}/releases/tags/{targetTag}";
                 HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    // Fallback to tags if no official release
-                    return await GetLatestTagAsync();
+                    // Fallback to latest release or tag search
+                    apiUrl = $"https://api.github.com/repos/{RepositoryOwner}/{RepositoryName}/releases/latest";
+                    response = await _httpClient.GetAsync(apiUrl);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return await GetLatestTagAsync();
+                    }
                 }
 
                 string json = await response.Content.ReadAsStringAsync();

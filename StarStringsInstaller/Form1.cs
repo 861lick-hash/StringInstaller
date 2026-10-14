@@ -81,14 +81,14 @@ namespace StarStringsInstaller
             {
                 if (_detector.IsValidStarCitizenDir(path))
                 {
-                    cmbEnvironment.Items.Add(path);
+                    cmbEnvironment.Items.Add(new EnvironmentItem(path));
                 }
             }
             else
             {
                 foreach (var env in envs)
                 {
-                    cmbEnvironment.Items.Add(env);
+                    cmbEnvironment.Items.Add(new EnvironmentItem(env));
                 }
             }
 
@@ -99,10 +99,14 @@ namespace StarStringsInstaller
                 {
                     for (int i = 0; i < cmbEnvironment.Items.Count; i++)
                     {
-                        if (cmbEnvironment.Items[i]?.ToString()?.Equals(preferredEnv, StringComparison.OrdinalIgnoreCase) == true)
+                        if (cmbEnvironment.Items[i] is EnvironmentItem item)
                         {
-                            selectedIndex = i;
-                            break;
+                            if (item.FullPath.Equals(preferredEnv, StringComparison.OrdinalIgnoreCase) ||
+                                item.FolderName.Equals(preferredEnv, StringComparison.OrdinalIgnoreCase))
+                            {
+                                selectedIndex = i;
+                                break;
+                            }
                         }
                     }
                 }
@@ -121,15 +125,18 @@ namespace StarStringsInstaller
             lblLatestVersion.Text = "Checking...";
             Log("Checking GitHub for the latest StarStrings release...");
 
+            string? envName = (cmbEnvironment.SelectedItem as EnvironmentItem)?.FolderName;
+
             try
             {
-                _latestRelease = await _updateService.GetLatestReleaseAsync();
-                if (_latestRelease != null && !string.IsNullOrEmpty(_latestRelease.TagName))
+                _latestRelease = await _updateService.GetLatestReleaseAsync(envName);
+                if (_latestRelease != null && !string.IsNullOrEmpty(_latestRelease.Name))
                 {
-                    lblLatestVersion.Text = _latestRelease.TagName;
-                    Log($"Latest release found: {_latestRelease.TagName}");
+                    string releaseDisplayName = _latestRelease.Name;
+                    lblLatestVersion.Text = releaseDisplayName;
+                    Log($"Latest release found: {releaseDisplayName}");
 
-                    if (_latestRelease.TagName.Equals(lblInstalledVersion.Text, StringComparison.OrdinalIgnoreCase))
+                    if (releaseDisplayName.Equals(lblInstalledVersion.Text, StringComparison.OrdinalIgnoreCase))
                     {
                         Log("You already have the latest version installed.");
                     }
@@ -155,9 +162,18 @@ namespace StarStringsInstaller
             }
         }
 
+        private string GetSelectedEnvironmentPath()
+        {
+            if (cmbEnvironment.SelectedItem is EnvironmentItem item)
+            {
+                return item.FullPath;
+            }
+            return txtStarCitizenPath.Text;
+        }
+
         private async void btnInstall_Click(object sender, EventArgs e)
         {
-            string targetEnvPath = cmbEnvironment.SelectedItem?.ToString() ?? txtStarCitizenPath.Text;
+            string targetEnvPath = GetSelectedEnvironmentPath();
 
             if (string.IsNullOrWhiteSpace(targetEnvPath) || !Directory.Exists(targetEnvPath))
             {
@@ -200,19 +216,19 @@ namespace StarStringsInstaller
                 }
 
                 // Step 3: Save settings
-                string currentTag = _latestRelease.TagName;
-                lblInstalledVersion.Text = currentTag;
+                string buildVersionName = _latestRelease.Name;
+                lblInstalledVersion.Text = buildVersionName;
 
                 var settings = new SettingsManager.AppSettings
                 {
                     StarCitizenPath = txtStarCitizenPath.Text,
                     TargetEnvironmentPath = targetEnvPath,
-                    InstalledVersion = currentTag
+                    InstalledVersion = buildVersionName
                 };
                 _settingsManager.Save(settings);
 
-                Log($"Installation of StarStrings {currentTag} complete!");
-                MessageBox.Show($"StarStrings {currentTag} installed successfully!", "Installation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Log($"Installation of StarStrings {buildVersionName} complete!");
+                MessageBox.Show($"StarStrings {buildVersionName} installed successfully!", "Installation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -248,6 +264,11 @@ namespace StarStringsInstaller
             {
                 PopulateEnvironments(txtStarCitizenPath.Text);
             }
+        }
+
+        private async void cmbEnvironment_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            await CheckForUpdatesAsync();
         }
     }
 }

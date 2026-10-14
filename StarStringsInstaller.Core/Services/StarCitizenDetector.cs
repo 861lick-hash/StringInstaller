@@ -4,6 +4,25 @@ using System.IO;
 
 namespace StarStringsInstaller.Services
 {
+    public class EnvironmentItem
+    {
+        public string FolderName { get; }
+        public string FullPath { get; }
+
+        public EnvironmentItem(string fullPath)
+        {
+            FullPath = fullPath;
+            string normalized = fullPath.TrimEnd('/', '\\').Replace('\\', '/');
+            FolderName = System.IO.Path.GetFileName(normalized);
+            if (string.IsNullOrEmpty(FolderName))
+            {
+                FolderName = fullPath;
+            }
+        }
+
+        public override string ToString() => FolderName;
+    }
+
     public class StarCitizenDetector
     {
         private static readonly string[] CommonPaths = new[]

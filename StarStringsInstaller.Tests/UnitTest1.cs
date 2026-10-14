@@ -183,10 +183,10 @@ namespace StarStringsInstaller.Tests
         public async Task GetLatestReleaseAsync_ParsesJsonResponseCorrectly()
         {
             string jsonResponse = @"{
-                ""tag_name"": ""v2.1.0"",
-                ""name"": ""Release v2.1.0"",
-                ""published_at"": ""2026-01-01T00:00:00Z"",
-                ""zipball_url"": ""https://api.github.com/repos/MrKraken/StarStrings/zipball/v2.1.0""
+                ""tag_name"": ""latest"",
+                ""name"": ""SC LIVE Build (release-2026-10-09-292e6be)"",
+                ""published_at"": ""2026-10-09T14:31:59Z"",
+                ""zipball_url"": ""https://api.github.com/repos/MrKraken/StarStrings/zipball/latest""
             }";
 
             var handler = new MockHttpMessageHandler(req => new HttpResponseMessage
@@ -198,12 +198,53 @@ namespace StarStringsInstaller.Tests
             using var httpClient = new HttpClient(handler);
             var service = new GitHubUpdateService(httpClient);
 
-            var release = await service.GetLatestReleaseAsync();
+            var release = await service.GetLatestReleaseAsync("LIVE");
 
             Assert.NotNull(release);
-            Assert.Equal("v2.1.0", release!.TagName);
-            Assert.Equal("Release v2.1.0", release.Name);
-            Assert.Equal("https://api.github.com/repos/MrKraken/StarStrings/zipball/v2.1.0", release.ZipUrl);
+            Assert.Equal("latest", release!.TagName);
+            Assert.Equal("SC LIVE Build (release-2026-10-09-292e6be)", release.Name);
+            Assert.Equal("https://api.github.com/repos/MrKraken/StarStrings/zipball/latest", release.ZipUrl);
+        }
+
+        [Fact]
+        public async Task GetLatestReleaseAsync_RequestsPtuTagWhenEnvironmentIsPtu()
+        {
+            string requestedUri = "";
+            string jsonResponse = @"{
+                ""tag_name"": ""latest-ptu"",
+                ""name"": ""SC PTU Build (release-2026-10-06-d59ccf1)"",
+                ""zipball_url"": ""https://api.github.com/repos/MrKraken/StarStrings/zipball/latest-ptu""
+            }";
+
+            var handler = new MockHttpMessageHandler(req =>
+            {
+                requestedUri = req.RequestUri?.ToString() ?? "";
+                return new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(jsonResponse)
+                };
+            });
+
+            using var httpClient = new HttpClient(handler);
+            var service = new GitHubUpdateService(httpClient);
+
+            var release = await service.GetLatestReleaseAsync("PTU");
+
+            Assert.Contains("releases/tags/latest-ptu", requestedUri);
+            Assert.NotNull(release);
+            Assert.Equal("SC PTU Build (release-2026-10-06-d59ccf1)", release!.Name);
+        }
+
+        [Fact]
+        public void EnvironmentItem_FormatsFolderNameAndFullPathCorrectly()
+        {
+            string fullPath = @"C:\Program Files\Roberts Space Industries\StarCitizen\LIVE";
+            var envItem = new EnvironmentItem(fullPath);
+
+            Assert.Equal("LIVE", envItem.FolderName);
+            Assert.Equal("LIVE", envItem.ToString());
+            Assert.Equal(fullPath, envItem.FullPath);
         }
 
         [Fact]
