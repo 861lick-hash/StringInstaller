@@ -204,6 +204,11 @@ namespace StarStringsInstaller.Tests
             Assert.Equal("latest", release!.TagName);
             Assert.Equal("SC LIVE Build (release-2026-10-09-292e6be)", release.Name);
             Assert.Equal("https://api.github.com/repos/MrKraken/StarStrings/zipball/latest", release.ZipUrl);
+
+            var (build, releaseStr) = release.GetFormattedBuildAndRelease();
+            Assert.Equal("SC LIVE Build", build);
+            Assert.Equal("release-2026-10-09-292e6be", releaseStr);
+            Assert.Equal($"Build: SC LIVE Build{Environment.NewLine}Release: release-2026-10-09-292e6be", release.GetFormattedDisplayString());
         }
 
         [Fact]
