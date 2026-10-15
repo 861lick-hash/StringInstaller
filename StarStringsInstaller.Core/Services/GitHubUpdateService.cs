@@ -13,6 +13,37 @@ namespace StarStringsInstaller.Services
         public string Name { get; set; } = string.Empty;
         public string ZipUrl { get; set; } = string.Empty;
         public string PublishedAt { get; set; } = string.Empty;
+
+        public (string Build, string Release) GetFormattedBuildAndRelease()
+        {
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                return (string.IsNullOrEmpty(TagName) ? "Unknown" : TagName, string.Empty);
+            }
+
+            // Name example: "SC LIVE Build (release-2026-10-09-292e6be)"
+            int openParen = Name.IndexOf('(');
+            int closeParen = Name.IndexOf(')');
+
+            if (openParen >= 0 && closeParen > openParen)
+            {
+                string build = Name.Substring(0, openParen).Trim();
+                string release = Name.Substring(openParen + 1, closeParen - openParen - 1).Trim();
+                return (build, release);
+            }
+
+            return (Name, string.Empty);
+        }
+
+        public string GetFormattedDisplayString()
+        {
+            var (build, release) = GetFormattedBuildAndRelease();
+            if (string.IsNullOrEmpty(release))
+            {
+                return $"Build: {build}";
+            }
+            return $"Build: {build}{Environment.NewLine}Release: {release}";
+        }
     }
 
     public class GitHubUpdateService

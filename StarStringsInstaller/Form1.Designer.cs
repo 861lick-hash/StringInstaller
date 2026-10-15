@@ -59,14 +59,14 @@ namespace StarStringsInstaller
             this.txtStarCitizenPath.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtStarCitizenPath.Location = new System.Drawing.Point(16, 76);
             this.txtStarCitizenPath.Name = "txtStarCitizenPath";
-            this.txtStarCitizenPath.Size = new System.Drawing.Size(430, 23);
+            this.txtStarCitizenPath.Size = new System.Drawing.Size(480, 23);
             this.txtStarCitizenPath.TabIndex = 2;
             this.txtStarCitizenPath.TextChanged += new System.EventHandler(this.txtStarCitizenPath_TextChanged);
             //
             // btnBrowse
             //
             this.btnBrowse.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnBrowse.Location = new System.Drawing.Point(454, 75);
+            this.btnBrowse.Location = new System.Drawing.Point(504, 75);
             this.btnBrowse.Name = "btnBrowse";
             this.btnBrowse.Size = new System.Drawing.Size(85, 25);
             this.btnBrowse.TabIndex = 3;
@@ -91,7 +91,7 @@ namespace StarStringsInstaller
             this.cmbEnvironment.FormattingEnabled = true;
             this.cmbEnvironment.Location = new System.Drawing.Point(145, 109);
             this.cmbEnvironment.Name = "cmbEnvironment";
-            this.cmbEnvironment.Size = new System.Drawing.Size(301, 23);
+            this.cmbEnvironment.Size = new System.Drawing.Size(351, 23);
             this.cmbEnvironment.TabIndex = 5;
             this.cmbEnvironment.SelectedIndexChanged += new System.EventHandler(this.cmbEnvironment_SelectedIndexChanged);
             //
@@ -99,7 +99,7 @@ namespace StarStringsInstaller
             //
             this.lblInstalledVersionHeader.AutoSize = true;
             this.lblInstalledVersionHeader.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblInstalledVersionHeader.Location = new System.Drawing.Point(16, 150);
+            this.lblInstalledVersionHeader.Location = new System.Drawing.Point(16, 148);
             this.lblInstalledVersionHeader.Name = "lblInstalledVersionHeader";
             this.lblInstalledVersionHeader.Size = new System.Drawing.Size(104, 15);
             this.lblInstalledVersionHeader.TabIndex = 6;
@@ -109,7 +109,7 @@ namespace StarStringsInstaller
             //
             this.lblInstalledVersion.AutoSize = true;
             this.lblInstalledVersion.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblInstalledVersion.Location = new System.Drawing.Point(126, 150);
+            this.lblInstalledVersion.Location = new System.Drawing.Point(16, 168);
             this.lblInstalledVersion.Name = "lblInstalledVersion";
             this.lblInstalledVersion.Size = new System.Drawing.Size(36, 15);
             this.lblInstalledVersion.TabIndex = 7;
@@ -119,7 +119,7 @@ namespace StarStringsInstaller
             //
             this.lblLatestVersionHeader.AutoSize = true;
             this.lblLatestVersionHeader.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblLatestVersionHeader.Location = new System.Drawing.Point(240, 150);
+            this.lblLatestVersionHeader.Location = new System.Drawing.Point(310, 148);
             this.lblLatestVersionHeader.Name = "lblLatestVersionHeader";
             this.lblLatestVersionHeader.Size = new System.Drawing.Size(90, 15);
             this.lblLatestVersionHeader.TabIndex = 8;
@@ -129,7 +129,7 @@ namespace StarStringsInstaller
             //
             this.lblLatestVersion.AutoSize = true;
             this.lblLatestVersion.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblLatestVersion.Location = new System.Drawing.Point(336, 150);
+            this.lblLatestVersion.Location = new System.Drawing.Point(310, 168);
             this.lblLatestVersion.Name = "lblLatestVersion";
             this.lblLatestVersion.Size = new System.Drawing.Size(71, 15);
             this.lblLatestVersion.TabIndex = 9;
@@ -138,7 +138,7 @@ namespace StarStringsInstaller
             // btnCheckUpdates
             //
             this.btnCheckUpdates.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnCheckUpdates.Location = new System.Drawing.Point(16, 180);
+            this.btnCheckUpdates.Location = new System.Drawing.Point(16, 215);
             this.btnCheckUpdates.Name = "btnCheckUpdates";
             this.btnCheckUpdates.Size = new System.Drawing.Size(130, 30);
             this.btnCheckUpdates.TabIndex = 10;
@@ -149,7 +149,7 @@ namespace StarStringsInstaller
             // btnInstall
             //
             this.btnInstall.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnInstall.Location = new System.Drawing.Point(155, 180);
+            this.btnInstall.Location = new System.Drawing.Point(155, 215);
             this.btnInstall.Name = "btnInstall";
             this.btnInstall.Size = new System.Drawing.Size(160, 30);
             this.btnInstall.TabIndex = 11;
@@ -161,7 +161,7 @@ namespace StarStringsInstaller
             //
             this.lblStatus.AutoSize = true;
             this.lblStatus.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
-            this.lblStatus.Location = new System.Drawing.Point(16, 222);
+            this.lblStatus.Location = new System.Drawing.Point(16, 255);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(42, 15);
             this.lblStatus.TabIndex = 12;
@@ -170,19 +170,19 @@ namespace StarStringsInstaller
             // txtLog
             //
             this.txtLog.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtLog.Location = new System.Drawing.Point(16, 245);
+            this.txtLog.Location = new System.Drawing.Point(16, 278);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
             this.txtLog.ReadOnly = true;
             this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtLog.Size = new System.Drawing.Size(523, 110);
+            this.txtLog.Size = new System.Drawing.Size(573, 115);
             this.txtLog.TabIndex = 13;
             //
             // Form1
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(555, 370);
+            this.ClientSize = new System.Drawing.Size(605, 410);
             this.Controls.Add(this.txtLog);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.btnInstall);

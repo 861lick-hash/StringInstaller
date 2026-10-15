@@ -130,11 +130,11 @@ namespace StarStringsInstaller
             try
             {
                 _latestRelease = await _updateService.GetLatestReleaseAsync(envName);
-                if (_latestRelease != null && !string.IsNullOrEmpty(_latestRelease.Name))
+                if (_latestRelease != null && (!string.IsNullOrEmpty(_latestRelease.Name) || !string.IsNullOrEmpty(_latestRelease.TagName)))
                 {
-                    string releaseDisplayName = _latestRelease.Name;
+                    string releaseDisplayName = _latestRelease.GetFormattedDisplayString();
                     lblLatestVersion.Text = releaseDisplayName;
-                    Log($"Latest release found: {releaseDisplayName}");
+                    Log($"Latest release found: {_latestRelease.Name}");
 
                     if (releaseDisplayName.Equals(lblInstalledVersion.Text, StringComparison.OrdinalIgnoreCase))
                     {
@@ -197,7 +197,7 @@ namespace StarStringsInstaller
 
             try
             {
-                Log($"Starting installation of {_latestRelease.TagName} into '{targetEnvPath}'...");
+                Log($"Starting installation of {_latestRelease.Name} into '{targetEnvPath}'...");
 
                 // Step 1: Download & extract files
                 await _updateService.DownloadAndExtractZipAsync(_latestRelease.ZipUrl, targetEnvPath);
@@ -216,7 +216,7 @@ namespace StarStringsInstaller
                 }
 
                 // Step 3: Save settings
-                string buildVersionName = _latestRelease.Name;
+                string buildVersionName = _latestRelease.GetFormattedDisplayString();
                 lblInstalledVersion.Text = buildVersionName;
 
                 var settings = new SettingsManager.AppSettings
@@ -227,8 +227,8 @@ namespace StarStringsInstaller
                 };
                 _settingsManager.Save(settings);
 
-                Log($"Installation of StarStrings {buildVersionName} complete!");
-                MessageBox.Show($"StarStrings {buildVersionName} installed successfully!", "Installation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Log($"Installation of StarStrings {_latestRelease.Name} complete!");
+                MessageBox.Show($"StarStrings {_latestRelease.Name} installed successfully!", "Installation Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
