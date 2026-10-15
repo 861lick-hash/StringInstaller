@@ -93,6 +93,7 @@ namespace StarStringsInstaller
             this.cmbEnvironment.Name = "cmbEnvironment";
             this.cmbEnvironment.Size = new System.Drawing.Size(301, 23);
             this.cmbEnvironment.TabIndex = 5;
+            this.cmbEnvironment.SelectedIndexChanged += new System.EventHandler(this.cmbEnvironment_SelectedIndexChanged);
             //
             // lblInstalledVersionHeader
             //
