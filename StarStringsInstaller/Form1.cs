@@ -152,29 +152,29 @@ namespace StarStringsInstaller
                 string? gitHubReadmeVersion = await _updateService.GetGitHubReadmeGameVersionAsync();
                 _latestRelease = await _updateService.GetLatestReleaseAsync(envName);
 
+                string latestVersionDisplay = "Unknown";
+                if (!string.IsNullOrEmpty(gitHubReadmeVersion))
+                {
+                    latestVersionDisplay = GitHubUpdateService.NormalizeVersion(gitHubReadmeVersion);
+                }
+                else if (_latestRelease != null && !string.IsNullOrEmpty(_latestRelease.Name))
+                {
+                    latestVersionDisplay = GitHubUpdateService.NormalizeVersion(_latestRelease.Name);
+                }
+
+                lblLatestVersion.Text = latestVersionDisplay;
+
                 if (_latestRelease != null && (!string.IsNullOrEmpty(_latestRelease.Name) || !string.IsNullOrEmpty(_latestRelease.TagName)))
                 {
-                    string releaseDisplayName = _latestRelease.GetFormattedDisplayString();
-                    lblLatestVersion.Text = releaseDisplayName;
-                    Log($"Latest release found: {_latestRelease.Name}");
-
-                    if (releaseDisplayName.Equals(lblInstalledVersion.Text, StringComparison.OrdinalIgnoreCase))
-                    {
-                        Log("You already have the latest version installed.");
-                    }
-                    else
-                    {
-                        Log("New update available! Click 'Install / Update' to install.");
-                    }
+                    Log($"Latest release found: {_latestRelease.Name} ({latestVersionDisplay})");
                 }
                 else
                 {
-                    lblLatestVersion.Text = "Unknown";
                     Log("Failed to retrieve release information from GitHub.");
                 }
 
-                // Highlighting logic: compare local game version against GitHub README build version
-                CheckAndHighlightVersionMismatch(localGameVersion, gitHubReadmeVersion);
+                // Compare installed version, latest version, and game version
+                CheckAndHighlightVersionMismatch(lblInstalledVersion.Text, latestVersionDisplay, localGameVersion);
             }
             catch (Exception ex)
             {
@@ -188,26 +188,67 @@ namespace StarStringsInstaller
             }
         }
 
-        private void CheckAndHighlightVersionMismatch(string? localGameVersion, string? gitHubReadmeVersion)
+        private void CheckAndHighlightVersionMismatch(string installedVersion, string latestVersion, string? localGameVersion)
         {
-            if (string.IsNullOrEmpty(localGameVersion) || string.IsNullOrEmpty(gitHubReadmeVersion))
+            string normInstalled = GitHubUpdateService.NormalizeVersion(installedVersion);
+            string normLatest = GitHubUpdateService.NormalizeVersion(latestVersion);
+            string normGame = string.IsNullOrEmpty(localGameVersion) ? string.Empty : GitHubUpdateService.NormalizeVersion(localGameVersion);
+
+            // Compare installed vs latest
+            if (!string.IsNullOrEmpty(normInstalled) && !normInstalled.Equals("none", StringComparison.OrdinalIgnoreCase))
             {
-                lblGameVersion.ForeColor = System.Drawing.Color.Red;
-                return;
+                if (!string.IsNullOrEmpty(normLatest) && !normLatest.Equals("unknown", StringComparison.OrdinalIgnoreCase) && !normLatest.Equals("error", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (normInstalled.Equals(normLatest, StringComparison.OrdinalIgnoreCase))
+                    {
+                        lblInstalledVersion.ForeColor = System.Drawing.Color.Black;
+                        Log("You already have the latest version installed.");
+                    }
+                    else
+                    {
+                        lblInstalledVersion.ForeColor = System.Drawing.Color.Red;
+                        Log("New update available! Click 'Install / Update' to install.");
+                    }
+                }
+                else
+                {
+                    lblInstalledVersion.ForeColor = System.Drawing.Color.Black;
+                }
+            }
+            else
+            {
+                lblInstalledVersion.ForeColor = System.Drawing.Color.Black;
+                if (!string.IsNullOrEmpty(normLatest) && !normLatest.Equals("unknown", StringComparison.OrdinalIgnoreCase))
+                {
+                    Log("StarStrings is not installed yet. Click 'Install / Update' to install.");
+                }
             }
 
-            string normLocal = GitHubUpdateService.NormalizeVersion(localGameVersion);
-            string normGitHub = GitHubUpdateService.NormalizeVersion(gitHubReadmeVersion);
-
-            if (!normLocal.Equals(normGitHub, StringComparison.OrdinalIgnoreCase))
+            // Compare game vs latest
+            if (string.IsNullOrEmpty(normGame) || string.IsNullOrEmpty(normLatest) || normLatest.Equals("unknown", StringComparison.OrdinalIgnoreCase) || normLatest.Equals("error", StringComparison.OrdinalIgnoreCase))
             {
                 lblGameVersion.ForeColor = System.Drawing.Color.Red;
-                Log($"Game version ({normLocal}) does not match StarStrings GitHub target build ({normGitHub}).");
+            }
+            else if (!normGame.Equals(normLatest, StringComparison.OrdinalIgnoreCase))
+            {
+                lblGameVersion.ForeColor = System.Drawing.Color.Red;
+                Log($"Game version ({normGame}) does not match StarStrings GitHub target build ({normLatest}).");
             }
             else
             {
                 lblGameVersion.ForeColor = System.Drawing.Color.Black;
                 Log("Game version matches StarStrings GitHub target build.");
+            }
+
+            // If all three match
+            if (!string.IsNullOrEmpty(normInstalled) &&
+                !normInstalled.Equals("none", StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrEmpty(normLatest) &&
+                !string.IsNullOrEmpty(normGame) &&
+                normInstalled.Equals(normLatest, StringComparison.OrdinalIgnoreCase) &&
+                normLatest.Equals(normGame, StringComparison.OrdinalIgnoreCase))
+            {
+                Log("Installed version, latest version, and local game version all match.");
             }
         }
 
@@ -265,14 +306,14 @@ namespace StarStringsInstaller
                 }
 
                 // Step 3: Save settings
-                string buildVersionName = _latestRelease.GetFormattedDisplayString();
-                lblInstalledVersion.Text = buildVersionName;
+                string installedVersionDisplay = lblLatestVersion.Text;
+                lblInstalledVersion.Text = installedVersionDisplay;
 
                 var settings = new SettingsManager.AppSettings
                 {
                     StarCitizenPath = txtStarCitizenPath.Text,
                     TargetEnvironmentPath = targetEnvPath,
-                    InstalledVersion = buildVersionName
+                    InstalledVersion = installedVersionDisplay
                 };
                 _settingsManager.Save(settings);
 

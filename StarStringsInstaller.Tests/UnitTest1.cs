@@ -212,6 +212,20 @@ namespace StarStringsInstaller.Tests
         }
 
         [Fact]
+        public void NormalizeVersion_HandlesReadmeAndBuildManifestFormats()
+        {
+            string readmeBuild = "sc-alpha-4.10.2_live_12881860";
+            string manifestBuild = "4.10.2-live.12881860";
+
+            string normReadme = GitHubUpdateService.NormalizeVersion(readmeBuild);
+            string normManifest = GitHubUpdateService.NormalizeVersion(manifestBuild);
+
+            Assert.Equal("4.10.2-live.12881860", normReadme);
+            Assert.Equal("4.10.2-live.12881860", normManifest);
+            Assert.Equal(normReadme, normManifest);
+        }
+
+        [Fact]
         public async Task GetLatestReleaseAsync_RequestsPtuTagWhenEnvironmentIsPtu()
         {
             string requestedUri = "";
