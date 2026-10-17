@@ -61,30 +61,80 @@ namespace StarStringsInstaller.Services
             }
         }
 
-        public async Task<string?> GetGitHubReadmeGameVersionAsync()
+        public async Task<string?> GetGitHubReadmeGameVersionAsync(string? environmentName = null)
         {
             try
             {
-                string rawUrl = $"https://raw.githubusercontent.com/{RepositoryOwner}/{RepositoryName}/main/README.md";
-                HttpResponseMessage response = await _httpClient.GetAsync(rawUrl);
+                bool isPtu = !string.IsNullOrEmpty(environmentName) && environmentName.Equals("PTU", StringComparison.OrdinalIgnoreCase);
+                string tagRef = isPtu ? "latest-ptu" : "master";
 
-                if (!response.IsSuccessStatusCode)
+                string[] refCandidates = isPtu
+                    ? new[] { tagRef, "latest", "master", "main" }
+                    : new[] { "master", "main", "latest" };
+
+                string[] fileCandidates = new[] { "readme.md", "README.md", "Readme.md" };
+
+                foreach (var branchRef in refCandidates)
                 {
-                    rawUrl = $"https://raw.githubusercontent.com/{RepositoryOwner}/{RepositoryName}/master/README.md";
-                    response = await _httpClient.GetAsync(rawUrl);
-                    if (!response.IsSuccessStatusCode)
+                    foreach (var fileName in fileCandidates)
                     {
-                        return null;
+                        string rawUrl = $"https://raw.githubusercontent.com/{RepositoryOwner}/{RepositoryName}/{branchRef}/{fileName}";
+                        HttpResponseMessage response = await _httpClient.GetAsync(rawUrl);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            string content = await response.Content.ReadAsStringAsync();
+                            string? version = ExtractBuildVersionFromReadme(content);
+                            if (!string.IsNullOrEmpty(version))
+                            {
+                                return version;
+                            }
+                        }
                     }
                 }
 
-                string content = await response.Content.ReadAsStringAsync();
-                return ExtractBuildVersionFromReadme(content);
+                // Fallback: try extracting readme from release archive
+                var release = await GetLatestReleaseAsync(environmentName);
+                if (release != null && !string.IsNullOrEmpty(release.ZipUrl))
+                {
+                    return await ExtractReadmeVersionFromReleaseZipAsync(release.ZipUrl);
+                }
+
+                return null;
             }
             catch
             {
                 return null;
             }
+        }
+
+        public async Task<string?> ExtractReadmeVersionFromReleaseZipAsync(string zipUrl)
+        {
+            try
+            {
+                byte[] zipBytes = await _httpClient.GetByteArrayAsync(zipUrl);
+                using var ms = new MemoryStream(zipBytes);
+                using var archive = new ZipArchive(ms, ZipArchiveMode.Read);
+
+                foreach (var entry in archive.Entries)
+                {
+                    if (entry.Name.Equals("readme.md", StringComparison.OrdinalIgnoreCase))
+                    {
+                        using var reader = new StreamReader(entry.Open());
+                        string content = await reader.ReadToEndAsync();
+                        string? version = ExtractBuildVersionFromReadme(content);
+                        if (!string.IsNullOrEmpty(version))
+                        {
+                            return version;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Fallback attempt failed
+            }
+
+            return null;
         }
 
         public string? ExtractBuildVersionFromReadme(string readmeContent)
