@@ -62,27 +62,28 @@ namespace StarStringsInstaller.Services
                 return string.Empty;
             }
 
-            string cleanBranch = branch;
-            if (cleanBranch.StartsWith("sc-alpha-", StringComparison.OrdinalIgnoreCase))
+            string cleanBranch = branch.Trim();
+            if (cleanBranch.StartsWith("sc-", StringComparison.OrdinalIgnoreCase))
             {
-                cleanBranch = cleanBranch.Substring("sc-alpha-".Length);
-            }
-            else if (cleanBranch.StartsWith("sc-", StringComparison.OrdinalIgnoreCase))
-            {
-                cleanBranch = cleanBranch.Substring("sc-".Length);
+                cleanBranch = cleanBranch.Substring(3);
             }
 
-            if (string.IsNullOrWhiteSpace(envName))
+            if (cleanBranch.Length > 0 && char.IsLower(cleanBranch[0]))
             {
-                envName = "live";
+                cleanBranch = char.ToUpper(cleanBranch[0]) + cleanBranch.Substring(1);
+            }
+            else if (cleanBranch.Length > 0 && char.IsDigit(cleanBranch[0]))
+            {
+                string stage = string.IsNullOrWhiteSpace(envName) ? "Alpha" : (char.ToUpper(envName[0]) + envName.Substring(1).ToLowerInvariant());
+                cleanBranch = $"{stage}-{cleanBranch}";
             }
 
             if (!string.IsNullOrWhiteSpace(changeNum))
             {
-                return $"{cleanBranch}-{envName}.{changeNum}";
+                return $"{cleanBranch}.{changeNum}";
             }
 
-            return $"{cleanBranch}-{envName}";
+            return cleanBranch;
         }
     }
 }

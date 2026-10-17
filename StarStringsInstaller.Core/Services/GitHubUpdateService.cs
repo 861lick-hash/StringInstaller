@@ -107,17 +107,11 @@ namespace StarStringsInstaller.Services
             if (string.IsNullOrWhiteSpace(rawVersion)) return string.Empty;
 
             string clean = rawVersion.Trim();
-            if (clean.StartsWith("sc-alpha-", StringComparison.OrdinalIgnoreCase))
+            if (clean.StartsWith("sc-", StringComparison.OrdinalIgnoreCase))
             {
-                clean = clean.Substring("sc-alpha-".Length);
-            }
-            else if (clean.StartsWith("sc-", StringComparison.OrdinalIgnoreCase))
-            {
-                clean = clean.Substring("sc-".Length);
+                clean = clean.Substring(3);
             }
 
-            // Convert underscores to standard separators if needed (e.g., 4.10.2_live_12881860 -> 4.10.2-live.12881860)
-            // Pattern: {branch}_{env}_{changenum}
             int firstUnderscore = clean.IndexOf('_');
             if (firstUnderscore > 0)
             {
@@ -125,10 +119,18 @@ namespace StarStringsInstaller.Services
                 if (secondUnderscore > firstUnderscore)
                 {
                     string branchPart = clean.Substring(0, firstUnderscore);
-                    string envPart = clean.Substring(firstUnderscore + 1, secondUnderscore - firstUnderscore - 1);
                     string changePart = clean.Substring(secondUnderscore + 1);
-                    return $"{branchPart}-{envPart.ToLowerInvariant()}.{changePart}";
+                    if (branchPart.Length > 0 && char.IsLower(branchPart[0]))
+                    {
+                        branchPart = char.ToUpper(branchPart[0]) + branchPart.Substring(1);
+                    }
+                    return $"{branchPart}.{changePart}";
                 }
+            }
+
+            if (clean.Length > 0 && char.IsLower(clean[0]))
+            {
+                clean = char.ToUpper(clean[0]) + clean.Substring(1);
             }
 
             return clean;

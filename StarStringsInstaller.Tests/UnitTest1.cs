@@ -293,7 +293,7 @@ Welcome to StarStrings repository.";
             string raw = "sc-alpha-4.10.2_live_12881860";
             string normalized = GitHubUpdateService.NormalizeVersion(raw);
 
-            Assert.Equal("4.10.2-live.12881860", normalized);
+            Assert.Equal("Alpha-4.10.2.12881860", normalized);
         }
     }
 
@@ -322,7 +322,7 @@ Welcome to StarStrings repository.";
                 string? version = service.GetGameVersion(tempDir);
 
                 Assert.NotNull(version);
-                Assert.Equal("4.10.2-live.12913470", version);
+                Assert.Equal("Alpha-4.10.2.12913470", version);
             }
             finally
             {
@@ -359,7 +359,7 @@ Welcome to StarStrings repository.";
             var service = new GameVersionService();
             string formatted = service.FormatGameVersion("sc-alpha-4.10.2", "12913470", "ptu");
 
-            Assert.Equal("4.10.2-ptu.12913470", formatted);
+            Assert.Equal("Alpha-4.10.2.12913470", formatted);
         }
     }
 }
