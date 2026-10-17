@@ -309,6 +309,33 @@ Welcome to StarStrings repository.";
 
             Assert.Equal("4.10.2-live.12881860", normalized);
         }
+
+        [Fact]
+        public async Task GetGitHubReadmeGameVersionAsync_FetchesReadmeFromLowercaseFileOnMasterBranch()
+        {
+            string readmeContent = "# MrKraken's String Replacements\n### (English) Community Translated .ini for **Star Citizen [Build: sc-alpha-4.10.2_live_12881860]**";
+
+            var handler = new MockHttpMessageHandler(req =>
+            {
+                if (req.RequestUri != null && req.RequestUri.ToString().Contains("/master/readme.md"))
+                {
+                    return new HttpResponseMessage
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Content = new StringContent(readmeContent)
+                    };
+                }
+                return new HttpResponseMessage { StatusCode = HttpStatusCode.NotFound };
+            });
+
+            using var httpClient = new HttpClient(handler);
+            var service = new GitHubUpdateService(httpClient);
+
+            string? version = await service.GetGitHubReadmeGameVersionAsync("LIVE");
+
+            Assert.NotNull(version);
+            Assert.Equal("sc-alpha-4.10.2_live_12881860", version);
+        }
     }
 
     public class GameVersionServiceTests

@@ -149,7 +149,7 @@ namespace StarStringsInstaller
                 }
 
                 // Check GitHub README version & release
-                string? gitHubReadmeVersion = await _updateService.GetGitHubReadmeGameVersionAsync();
+                string? gitHubReadmeVersion = await _updateService.GetGitHubReadmeGameVersionAsync(envName);
                 _latestRelease = await _updateService.GetLatestReleaseAsync(envName);
 
                 string latestVersionDisplay = "Unknown";
