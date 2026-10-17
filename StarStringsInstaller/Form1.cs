@@ -12,6 +12,7 @@ namespace StarStringsInstaller
         private readonly GitHubUpdateService _updateService;
         private readonly UserCfgManager _cfgManager;
         private readonly SettingsManager _settingsManager;
+        private readonly GameVersionService _gameVersionService;
 
         private ReleaseInfo? _latestRelease;
 
@@ -22,19 +23,22 @@ namespace StarStringsInstaller
             _updateService = new GitHubUpdateService();
             _cfgManager = new UserCfgManager();
             _settingsManager = new SettingsManager();
+            _gameVersionService = new GameVersionService();
         }
 
         public Form1(
             StarCitizenDetector detector,
             GitHubUpdateService updateService,
             UserCfgManager cfgManager,
-            SettingsManager settingsManager)
+            SettingsManager settingsManager,
+            GameVersionService? gameVersionService = null)
         {
             InitializeComponent();
             _detector = detector;
             _updateService = updateService;
             _cfgManager = cfgManager;
             _settingsManager = settingsManager;
+            _gameVersionService = gameVersionService ?? new GameVersionService();
         }
 
         private async void Form1_Load(object sender, EventArgs e)
@@ -123,13 +127,31 @@ namespace StarStringsInstaller
         {
             btnCheckUpdates.Enabled = false;
             lblLatestVersion.Text = "Checking...";
-            Log("Checking GitHub for the latest StarStrings release...");
+            lblGameVersion.Text = "Checking...";
+            Log("Checking GitHub for the latest StarStrings release and game version...");
 
+            string targetEnvPath = GetSelectedEnvironmentPath();
             string? envName = (cmbEnvironment.SelectedItem as EnvironmentItem)?.FolderName;
 
             try
             {
+                // Detect local game version
+                string? localGameVersion = _gameVersionService.GetGameVersion(targetEnvPath);
+                if (!string.IsNullOrEmpty(localGameVersion))
+                {
+                    lblGameVersion.Text = localGameVersion;
+                    Log($"Local Game Version: {localGameVersion}");
+                }
+                else
+                {
+                    lblGameVersion.Text = "Unknown";
+                    Log("Could not detect local game version from build_manifest.id.");
+                }
+
+                // Check GitHub README version & release
+                string? gitHubReadmeVersion = await _updateService.GetGitHubReadmeGameVersionAsync();
                 _latestRelease = await _updateService.GetLatestReleaseAsync(envName);
+
                 if (_latestRelease != null && (!string.IsNullOrEmpty(_latestRelease.Name) || !string.IsNullOrEmpty(_latestRelease.TagName)))
                 {
                     string releaseDisplayName = _latestRelease.GetFormattedDisplayString();
@@ -150,15 +172,42 @@ namespace StarStringsInstaller
                     lblLatestVersion.Text = "Unknown";
                     Log("Failed to retrieve release information from GitHub.");
                 }
+
+                // Highlighting logic: compare local game version against GitHub README build version
+                CheckAndHighlightVersionMismatch(localGameVersion, gitHubReadmeVersion);
             }
             catch (Exception ex)
             {
                 lblLatestVersion.Text = "Error";
+                lblGameVersion.Text = "Error";
                 Log($"Error checking updates: {ex.Message}");
             }
             finally
             {
                 btnCheckUpdates.Enabled = true;
+            }
+        }
+
+        private void CheckAndHighlightVersionMismatch(string? localGameVersion, string? gitHubReadmeVersion)
+        {
+            if (string.IsNullOrEmpty(localGameVersion) || string.IsNullOrEmpty(gitHubReadmeVersion))
+            {
+                lblGameVersion.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            string normLocal = GitHubUpdateService.NormalizeVersion(localGameVersion);
+            string normGitHub = GitHubUpdateService.NormalizeVersion(gitHubReadmeVersion);
+
+            if (!normLocal.Equals(normGitHub, StringComparison.OrdinalIgnoreCase))
+            {
+                lblGameVersion.ForeColor = System.Drawing.Color.Red;
+                Log($"Game version ({normLocal}) does not match StarStrings GitHub target build ({normGitHub}).");
+            }
+            else
+            {
+                lblGameVersion.ForeColor = System.Drawing.Color.Black;
+                Log("Game version matches StarStrings GitHub target build.");
             }
         }
 
