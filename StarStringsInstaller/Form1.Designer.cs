@@ -27,6 +27,8 @@ namespace StarStringsInstaller
             this.lblInstalledVersion = new System.Windows.Forms.Label();
             this.lblLatestVersionHeader = new System.Windows.Forms.Label();
             this.lblLatestVersion = new System.Windows.Forms.Label();
+            this.lblGameVersionHeader = new System.Windows.Forms.Label();
+            this.lblGameVersion = new System.Windows.Forms.Label();
             this.btnCheckUpdates = new System.Windows.Forms.Button();
             this.btnInstall = new System.Windows.Forms.Button();
             this.lblStatus = new System.Windows.Forms.Label();
@@ -119,7 +121,7 @@ namespace StarStringsInstaller
             //
             this.lblLatestVersionHeader.AutoSize = true;
             this.lblLatestVersionHeader.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblLatestVersionHeader.Location = new System.Drawing.Point(310, 148);
+            this.lblLatestVersionHeader.Location = new System.Drawing.Point(200, 148);
             this.lblLatestVersionHeader.Name = "lblLatestVersionHeader";
             this.lblLatestVersionHeader.Size = new System.Drawing.Size(90, 15);
             this.lblLatestVersionHeader.TabIndex = 8;
@@ -129,11 +131,31 @@ namespace StarStringsInstaller
             //
             this.lblLatestVersion.AutoSize = true;
             this.lblLatestVersion.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblLatestVersion.Location = new System.Drawing.Point(310, 168);
+            this.lblLatestVersion.Location = new System.Drawing.Point(200, 168);
             this.lblLatestVersion.Name = "lblLatestVersion";
             this.lblLatestVersion.Size = new System.Drawing.Size(71, 15);
             this.lblLatestVersion.TabIndex = 9;
             this.lblLatestVersion.Text = "Checking...";
+            //
+            // lblGameVersionHeader
+            //
+            this.lblGameVersionHeader.AutoSize = true;
+            this.lblGameVersionHeader.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblGameVersionHeader.Location = new System.Drawing.Point(400, 148);
+            this.lblGameVersionHeader.Name = "lblGameVersionHeader";
+            this.lblGameVersionHeader.Size = new System.Drawing.Size(90, 15);
+            this.lblGameVersionHeader.TabIndex = 14;
+            this.lblGameVersionHeader.Text = "Game Version:";
+            //
+            // lblGameVersion
+            //
+            this.lblGameVersion.AutoSize = true;
+            this.lblGameVersion.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblGameVersion.Location = new System.Drawing.Point(400, 168);
+            this.lblGameVersion.Name = "lblGameVersion";
+            this.lblGameVersion.Size = new System.Drawing.Size(71, 15);
+            this.lblGameVersion.TabIndex = 15;
+            this.lblGameVersion.Text = "Checking...";
             //
             // btnCheckUpdates
             //
@@ -187,6 +209,8 @@ namespace StarStringsInstaller
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.btnInstall);
             this.Controls.Add(this.btnCheckUpdates);
+            this.Controls.Add(this.lblGameVersion);
+            this.Controls.Add(this.lblGameVersionHeader);
             this.Controls.Add(this.lblLatestVersion);
             this.Controls.Add(this.lblLatestVersionHeader);
             this.Controls.Add(this.lblInstalledVersion);
@@ -220,6 +244,8 @@ namespace StarStringsInstaller
         private System.Windows.Forms.Label lblInstalledVersion;
         private System.Windows.Forms.Label lblLatestVersionHeader;
         private System.Windows.Forms.Label lblLatestVersion;
+        private System.Windows.Forms.Label lblGameVersionHeader;
+        private System.Windows.Forms.Label lblGameVersion;
         private System.Windows.Forms.Button btnCheckUpdates;
         private System.Windows.Forms.Button btnInstall;
         private System.Windows.Forms.Label lblStatus;

@@ -272,5 +272,94 @@ namespace StarStringsInstaller.Tests
                 if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
             }
         }
+
+        [Fact]
+        public void ExtractBuildVersionFromReadme_ParsesBuildTag()
+        {
+            string readmeContent = @"# StarStrings
+[Build: sc-alpha-4.10.2_live_12881860]
+
+Welcome to StarStrings repository.";
+
+            var service = new GitHubUpdateService();
+            string? buildVersion = service.ExtractBuildVersionFromReadme(readmeContent);
+
+            Assert.Equal("sc-alpha-4.10.2_live_12881860", buildVersion);
+        }
+
+        [Fact]
+        public void NormalizeVersion_NormalizesUnderscoresAndPrefixes()
+        {
+            string raw = "sc-alpha-4.10.2_live_12881860";
+            string normalized = GitHubUpdateService.NormalizeVersion(raw);
+
+            Assert.Equal("4.10.2-live.12881860", normalized);
+        }
+    }
+
+    public class GameVersionServiceTests
+    {
+        [Fact]
+        public void GetGameVersion_ParsesBuildManifestCorrectly()
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "LIVE");
+            Directory.CreateDirectory(tempDir);
+            string manifestPath = Path.Combine(tempDir, "build_manifest.id");
+
+            string manifestJson = @"{
+                ""Data"": {
+                    ""Branch"": ""sc-alpha-4.10.2"",
+                    ""BuildDateStamp"": ""Mon Oct 12 2026"",
+                    ""RequestedP4ChangeNum"": ""12913470""
+                }
+            }";
+
+            File.WriteAllText(manifestPath, manifestJson);
+
+            try
+            {
+                var service = new GameVersionService();
+                string? version = service.GetGameVersion(tempDir);
+
+                Assert.NotNull(version);
+                Assert.Equal("4.10.2-live.12913470", version);
+            }
+            finally
+            {
+                string? parent = Directory.GetParent(tempDir)?.FullName;
+                if (!string.IsNullOrEmpty(parent) && Directory.Exists(parent))
+                {
+                    Directory.Delete(parent, true);
+                }
+            }
+        }
+
+        [Fact]
+        public void GetGameVersion_ReturnsNullWhenFileMissing()
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+
+            try
+            {
+                var service = new GameVersionService();
+                string? version = service.GetGameVersion(tempDir);
+
+                Assert.Null(version);
+            }
+            finally
+            {
+                if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+            }
+        }
+
+        [Fact]
+        public void FormatGameVersion_FormatsBranchAndEnvCorrectly()
+        {
+            var service = new GameVersionService();
+            string formatted = service.FormatGameVersion("sc-alpha-4.10.2", "12913470", "ptu");
+
+            Assert.Equal("4.10.2-ptu.12913470", formatted);
+        }
     }
 }

@@ -61,6 +61,79 @@ namespace StarStringsInstaller.Services
             }
         }
 
+        public async Task<string?> GetGitHubReadmeGameVersionAsync()
+        {
+            try
+            {
+                string rawUrl = $"https://raw.githubusercontent.com/{RepositoryOwner}/{RepositoryName}/main/README.md";
+                HttpResponseMessage response = await _httpClient.GetAsync(rawUrl);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    rawUrl = $"https://raw.githubusercontent.com/{RepositoryOwner}/{RepositoryName}/master/README.md";
+                    response = await _httpClient.GetAsync(rawUrl);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return null;
+                    }
+                }
+
+                string content = await response.Content.ReadAsStringAsync();
+                return ExtractBuildVersionFromReadme(content);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public string? ExtractBuildVersionFromReadme(string readmeContent)
+        {
+            if (string.IsNullOrWhiteSpace(readmeContent)) return null;
+
+            int startIndex = readmeContent.IndexOf("[Build:", StringComparison.OrdinalIgnoreCase);
+            if (startIndex < 0) return null;
+
+            startIndex += "[Build:".Length;
+            int endIndex = readmeContent.IndexOf(']', startIndex);
+            if (endIndex <= startIndex) return null;
+
+            string buildStr = readmeContent.Substring(startIndex, endIndex - startIndex).Trim();
+            return buildStr;
+        }
+
+        public static string NormalizeVersion(string rawVersion)
+        {
+            if (string.IsNullOrWhiteSpace(rawVersion)) return string.Empty;
+
+            string clean = rawVersion.Trim();
+            if (clean.StartsWith("sc-alpha-", StringComparison.OrdinalIgnoreCase))
+            {
+                clean = clean.Substring("sc-alpha-".Length);
+            }
+            else if (clean.StartsWith("sc-", StringComparison.OrdinalIgnoreCase))
+            {
+                clean = clean.Substring("sc-".Length);
+            }
+
+            // Convert underscores to standard separators if needed (e.g., 4.10.2_live_12881860 -> 4.10.2-live.12881860)
+            // Pattern: {branch}_{env}_{changenum}
+            int firstUnderscore = clean.IndexOf('_');
+            if (firstUnderscore > 0)
+            {
+                int secondUnderscore = clean.IndexOf('_', firstUnderscore + 1);
+                if (secondUnderscore > firstUnderscore)
+                {
+                    string branchPart = clean.Substring(0, firstUnderscore);
+                    string envPart = clean.Substring(firstUnderscore + 1, secondUnderscore - firstUnderscore - 1);
+                    string changePart = clean.Substring(secondUnderscore + 1);
+                    return $"{branchPart}-{envPart.ToLowerInvariant()}.{changePart}";
+                }
+            }
+
+            return clean;
+        }
+
         public async Task<ReleaseInfo?> GetLatestReleaseAsync(string? environmentName = null)
         {
             bool isPtu = !string.IsNullOrEmpty(environmentName) && environmentName.Equals("PTU", StringComparison.OrdinalIgnoreCase);
